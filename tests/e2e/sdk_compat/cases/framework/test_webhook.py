@@ -66,6 +66,14 @@ def test_payload_values_and_missing_fields():
 
 def test_metadata_provenance_and_destroy_missing_fields():
     created = event("created")
+    created["event_data"] = {"sandbox_metadata": {}}
+    assert_payload(created, "created", metadata={})
+    with pytest.raises(AssertionError, match="trusted current create"):
+        assert_payload(created, "created")
+    created["event_data"] = {}
+    assert_payload(created, "created")
+    with pytest.raises(KeyError, match="sandbox_metadata"):
+        assert_payload(created, "created", metadata={})
     created["event_data"] = {"sandbox_metadata": {"user_token": "fixture-only"}}
     assert_payload(created, "created", metadata={"user_token": "fixture-only"})
     with pytest.raises(AssertionError, match="trusted current create"):
